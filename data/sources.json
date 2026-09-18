@@ -1,0 +1,71 @@
+{
+  "version": 2,
+  "sources": [
+    {
+      "id": "symoheasr_telegram",
+      "name": "وزارة التعليم العالي والبحث العلمي السورية",
+      "type": "telegram",
+      "url": "https://t.me/s/symoheasr",
+      "channel": "SyMOHEASR",
+      "baseline_post_id": 13130,
+      "enabled": true
+    },
+    {
+      "id": "damascus_fb",
+      "name": "جامعة دمشق",
+      "type": "facebook",
+      "url": "https://www.facebook.com/Damas.University",
+      "enabled": true
+    },
+    {
+      "id": "aleppo_fb",
+      "name": "جامعة حلب",
+      "type": "facebook",
+      "url": "https://www.facebook.com/aleppo.university.official",
+      "enabled": true
+    },
+    {
+      "id": "idlib_fb",
+      "name": "جامعة إدلب",
+      "type": "facebook",
+      "url": "https://www.facebook.com/idleb.univ1",
+      "enabled": true
+    },
+    {
+      "id": "homs_fb",
+      "name": "جامعة حمص",
+      "type": "facebook",
+      "url": "https://www.facebook.com/homsuniv",
+      "enabled": true
+    },
+    {
+      "id": "hama_fb",
+      "name": "جامعة حماة",
+      "type": "facebook",
+      "url": "https://www.facebook.com/HamaUnivWeb",
+      "enabled": true
+    },
+    {
+      "id": "latakia_fb",
+      "name": "جامعة اللاذقية",
+      "type": "facebook",
+      "url": "https://www.facebook.com/LatakiaUniversity",
+      "enabled": true
+    },
+    {
+      "id": "furat_fb",
+      "name": "جامعة الفرات",
+      "type": "facebook",
+      "url": "https://www.facebook.com/AlForatUniversity",
+      "enabled": true
+    },
+    {
+      "id": "svu_fb",
+      "name": "الجامعة الافتراضية السورية",
+      "type": "facebook",
+      "url": "https://www.facebook.com/svuonline.org",
+      "enabled": true
+    }
+  ],
+  "note": "Facebook public pages are registered for monitoring, but direct scraping is intentionally not treated as reliable. Add official Telegram/RSS/site mirrors when available."
+}
