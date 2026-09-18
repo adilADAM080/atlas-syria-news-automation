@@ -2,7 +2,6 @@ import json
 import os
 import re
 import sys
-
 import requests
 
 INPUT = "output/new_posts.json"
@@ -10,10 +9,7 @@ STATE = "data/state.json"
 
 def clean_title(text):
     lines = [re.sub(r"\s+", " ", x).strip(" -–—") for x in (text or "").splitlines() if x.strip()]
-    if not lines:
-        return "خبر جديد من وزارة التعليم العالي والبحث العلمي"
-    title = lines[0]
-    return title[:150] if len(title) > 150 else title
+    return (lines[0][:150] if lines else "خبر جامعي جديد")
 
 def paragraph_html(text):
     blocks = [x.strip() for x in re.split(r"\n{2,}", text or "") if x.strip()]
@@ -32,43 +28,49 @@ def main():
     with open(STATE, "r", encoding="utf-8") as f:
         state = json.load(f)
 
-    processed_ids = set(map(int, state.get("processed_post_ids", [])))
-    processed_hashes = set(state.get("processed_hashes", []))
+    state.setdefault("version", 2)
+    state.setdefault("sources", {})
     session = requests.Session()
     session.auth = (user, password)
 
     for post in payload.get("posts", []):
+        sid = post["source_id"]
+        st = state["sources"].setdefault(sid, {
+            "last_seen_post_id": 0, "processed_post_ids": [], "processed_hashes": []
+        })
+        processed_ids = set(map(int, st.get("processed_post_ids", [])))
+        processed_hashes = set(st.get("processed_hashes", []))
         pid = int(post["post_id"])
         phash = post["text_hash"]
         if pid in processed_ids or phash in processed_hashes:
             continue
 
-        title = clean_title(post["text"])
-        source = post["source_url"]
-        content = paragraph_html(post["text"])
-        content += f'\n<p><strong>المصدر:</strong> <a href="{source}" rel="noopener">وزارة التعليم العالي والبحث العلمي السورية</a></p>'
-        excerpt = re.sub(r"\s+", " ", post["text"]).strip()[:155]
-
+        source_url = post["source_url"]
+        source_name = post.get("source_name", "المصدر الرسمي")
         body = {
-            "title": title,
-            "content": content,
-            "excerpt": excerpt,
+            "title": clean_title(post["text"]),
+            "content": paragraph_html(post["text"]) +
+                f'\n<p><strong>المصدر:</strong> <a href="{source_url}" rel="noopener">{source_name}</a></p>',
+            "excerpt": normalize_excerpt(post["text"]),
             "status": "draft"
         }
         r = session.post(f"{site}/wp-json/wp/v2/posts", json=body, timeout=30)
         if r.status_code not in (200, 201):
-            print(f"Failed to create draft for Telegram {pid}: HTTP {r.status_code}", file=sys.stderr)
+            print(f"Draft failed for {sid} #{pid}: HTTP {r.status_code}", file=sys.stderr)
             continue
 
         created = r.json()
-        print(f"Created WordPress draft {created.get('id')} from Telegram {pid}.")
+        print(f"Created WordPress draft {created.get('id')} from {sid} #{pid}.")
         processed_ids.add(pid)
         processed_hashes.add(phash)
+        st["processed_post_ids"] = sorted(processed_ids)[-500:]
+        st["processed_hashes"] = list(processed_hashes)[-500:]
 
-    state["processed_post_ids"] = sorted(processed_ids)[-500:]
-    state["processed_hashes"] = list(processed_hashes)[-500:]
     with open(STATE, "w", encoding="utf-8") as f:
         json.dump(state, f, ensure_ascii=False, indent=2)
+
+def normalize_excerpt(text):
+    return re.sub(r"\s+", " ", text or "").strip()[:155]
 
 if __name__ == "__main__":
     main()
