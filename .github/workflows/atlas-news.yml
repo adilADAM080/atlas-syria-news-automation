@@ -1,0 +1,34 @@
+name: Atlas Syria News Monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check official Telegram mirror
+        run: python src/monitor.py
+
+      - name: Upload candidate posts
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-syria-news-candidates
+          path: output/new_posts.json
+          retention-days: 7
