@@ -1,6 +1,50 @@
 {
-  "baseline_post_id": 13130,
-  "last_seen_post_id": 13130,
-  "processed_post_ids": [],
-  "processed_hashes": []
+  "version": 2,
+  "sources": {
+    "symoheasr_telegram": {
+      "last_seen_post_id": 13140,
+      "processed_post_ids": [],
+      "processed_hashes": []
+    },
+    "damascus_fb": {
+      "last_seen_post_id": 0,
+      "processed_post_ids": [],
+      "processed_hashes": []
+    },
+    "aleppo_fb": {
+      "last_seen_post_id": 0,
+      "processed_post_ids": [],
+      "processed_hashes": []
+    },
+    "idlib_fb": {
+      "last_seen_post_id": 0,
+      "processed_post_ids": [],
+      "processed_hashes": []
+    },
+    "homs_fb": {
+      "last_seen_post_id": 0,
+      "processed_post_ids": [],
+      "processed_hashes": []
+    },
+    "hama_fb": {
+      "last_seen_post_id": 0,
+      "processed_post_ids": [],
+      "processed_hashes": []
+    },
+    "latakia_fb": {
+      "last_seen_post_id": 0,
+      "processed_post_ids": [],
+      "processed_hashes": []
+    },
+    "furat_fb": {
+      "last_seen_post_id": 0,
+      "processed_post_ids": [],
+      "processed_hashes": []
+    },
+    "svu_fb": {
+      "last_seen_post_id": 0,
+      "processed_post_ids": [],
+      "processed_hashes": []
+    }
+  }
 }
