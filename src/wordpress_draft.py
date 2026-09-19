@@ -1,3 +1,4 @@
+import base64
 import html
 import json
 import os
@@ -35,6 +36,7 @@ def check_wordpress_user(session, site):
     if r.status_code != 200:
         print(f"WordPress auth check failed: HTTP {r.status_code}", file=sys.stderr)
         print(r.text[:500], file=sys.stderr)
+        print("Continuing with draft attempts because some WordPress setups restrict /users/me.")
         return False
 
     profile = r.json()
@@ -50,7 +52,7 @@ def check_wordpress_user(session, site):
     )
     if not can_create:
         print(
-            "WordPress user cannot create posts. Use an Administrator/Editor account "
+            "WordPress user may not be able to create posts. Use an Administrator/Editor account "
             "or grant this user the edit_posts capability, then create a new Application Password.",
             file=sys.stderr,
         )
@@ -75,16 +77,16 @@ def main():
     session = requests.Session()
     session.trust_env = os.getenv("ATLAS_USE_SYSTEM_PROXY") == "1"
     session.auth = (user, password)
+    auth_token = base64.b64encode(f"{user}:{password}".encode("utf-8")).decode("ascii")
     session.headers.update(
         {
             "Accept": "application/json",
-            "User-Agent": "AtlasSyriaNewsMonitor/2.4 (+https://atlas-sy.com)",
+            "Authorization": f"Basic {auth_token}",
+            "User-Agent": "AtlasSyriaNewsMonitor/2.5 (+https://atlas-sy.com)",
         }
     )
 
-    if not check_wordpress_user(session, site):
-        print("No WordPress drafts were created.")
-        return
+    check_wordpress_user(session, site)
 
     created_any = False
     for post in payload.get("posts", []):
