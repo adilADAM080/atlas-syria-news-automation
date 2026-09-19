@@ -29,6 +29,34 @@ def normalize_excerpt(text):
     return re.sub(r"\s+", " ", text or "").strip()[:155]
 
 
+def check_wordpress_user(session, site):
+    url = f"{site}/wp-json/wp/v2/users/me?context=edit"
+    r = session.get(url, timeout=30)
+    if r.status_code != 200:
+        print(f"WordPress auth check failed: HTTP {r.status_code}", file=sys.stderr)
+        print(r.text[:500], file=sys.stderr)
+        return False
+
+    profile = r.json()
+    capabilities = profile.get("capabilities") or {}
+    name = profile.get("name") or profile.get("slug") or profile.get("id")
+    role_names = ", ".join(profile.get("roles") or []) or "unknown"
+    can_create = bool(capabilities.get("edit_posts"))
+    can_publish = bool(capabilities.get("publish_posts"))
+    print(
+        "WordPress auth ok: "
+        f"user={name}, roles={role_names}, "
+        f"edit_posts={can_create}, publish_posts={can_publish}"
+    )
+    if not can_create:
+        print(
+            "WordPress user cannot create posts. Use an Administrator/Editor account "
+            "or grant this user the edit_posts capability, then create a new Application Password.",
+            file=sys.stderr,
+        )
+    return can_create
+
+
 def main():
     site = os.getenv("WP_SITE_URL", "").rstrip("/")
     user = os.getenv("WP_USERNAME", "")
@@ -47,7 +75,16 @@ def main():
     session = requests.Session()
     session.trust_env = os.getenv("ATLAS_USE_SYSTEM_PROXY") == "1"
     session.auth = (user, password)
-    session.headers.update({"User-Agent": "AtlasSyriaNewsMonitor/2.3 (+https://atlas-sy.com)"})
+    session.headers.update(
+        {
+            "Accept": "application/json",
+            "User-Agent": "AtlasSyriaNewsMonitor/2.4 (+https://atlas-sy.com)",
+        }
+    )
+
+    if not check_wordpress_user(session, site):
+        print("No WordPress drafts were created.")
+        return
 
     created_any = False
     for post in payload.get("posts", []):
