@@ -47,6 +47,7 @@ def main():
     session = requests.Session()
     session.trust_env = os.getenv("ATLAS_USE_SYSTEM_PROXY") == "1"
     session.auth = (user, password)
+    session.headers.update({"User-Agent": "AtlasSyriaNewsMonitor/2.3 (+https://atlas-sy.com)"})
 
     created_any = False
     for post in payload.get("posts", []):
@@ -73,7 +74,7 @@ def main():
             "excerpt": normalize_excerpt(post["text"]),
             "status": "draft",
         }
-        r = session.post(f"{site}/wp-json/wp/v2/posts", json=body, timeout=30)
+        r = session.post(f"{site}/wp-json/wp/v2/posts", data=body, timeout=30)
         if r.status_code not in (200, 201):
             print(f"Draft failed for {sid} #{pid}: HTTP {r.status_code}", file=sys.stderr)
             print(r.text[:500], file=sys.stderr)
